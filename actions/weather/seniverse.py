@@ -2,12 +2,26 @@
 Weather data is provided by https://www.seniverse.com/,
 below code are modified from https://github.com/seniverse/seniverse-api-demos
 
-FREE version only get future 3 days!
+# 心知天气接口  https://www.seniverse.com/
+知心天气接口  只提供未来三天免费的天气查询
 """
 import os
 import requests
 import json
-from actions.utils.const_value import API, KEY, UNIT, LANGUAGE
+
+try:
+    from actions.private import KEY  # KEY值需要
+except Exception:
+    KEY = ""
+    print('Please register https://www.seniverse.com get KEY')
+
+
+UID = "U785B76FC9"  # 用户ID
+
+LOCATION = 'beijing'  # 所查询的位置，可以使用城市拼音、v3 ID、经纬度等
+API = 'https://api.seniverse.com/v3/weather/daily.json'  # API URL，可替换为其他 URL
+UNIT = 'c'  # 单位
+LANGUAGE = 'zh-Hans'  # 查询结果的返回语言
 
 
 def fetch_weather(location, start=0, days=15):

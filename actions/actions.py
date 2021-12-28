@@ -12,8 +12,8 @@ from typing import Any, Text, Dict, List
 
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from actions.utils import ass_datetime
-from actions.utils import weather
+from actions.dt import ass_dt
+from actions.weather import seniverse
 
 
 class ActionTellDate(Action):
@@ -34,12 +34,12 @@ class ActionTellDate(Action):
             tracker.get_latest_entity_values("alien_date"), None)
         if entity_date:
             dispatcher.utter_message(
-                text=ass_datetime.get_date_by_entity(entity_date))
+                text=ass_dt.get_date_by_entity(entity_date))
         else:
             value_date = next(tracker.get_latest_entity_values(
                 "time"), None)  # DucklingEntityExtractor
             dispatcher.utter_message(
-                text=ass_datetime.get_date_by_value(value_date))
+                text=ass_dt.get_date_by_value(value_date))
 
         return []
 
@@ -60,12 +60,12 @@ class ActionDateDifferent(Action):
             dispatcher.utter_message(response='utter_un_come_true')
 
         if len(dt_list) == 1:
-            d0 = ass_datetime.get_datetime(dt_list[0])
+            d0 = ass_dt.get_datetime(dt_list[0])
             d1 = datetime.today()
 
         if len(dt_list) == 2:
-            d0 = ass_datetime.get_datetime(dt_list[0])
-            d1 = ass_datetime.get_datetime(dt_list[1])
+            d0 = ass_dt.get_datetime(dt_list[0])
+            d1 = ass_dt.get_datetime(dt_list[1])
 
         if d1 > d0:
             d0, d1 = d1, d0
@@ -90,13 +90,13 @@ class ActionTellTime(Action):
         print('entity_local:', entity_local)
         if entity_local:
             dispatcher.utter_message(
-                text=ass_datetime.get_time_by_entity(entity_local))
+                text=ass_dt.get_time_by_entity(entity_local))
         else:
             value_date = next(tracker.get_latest_entity_values(
                 "time"), None)  # DucklingEntityExtractor
 
             dispatcher.utter_message(
-                text=ass_datetime.get_time_by_value(value_date))
+                text=ass_dt.get_time_by_value(value_date))
 
         return []
 
@@ -109,13 +109,13 @@ class ActionTimeDifferent(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        place_list = []
+        place_list = set()
 
         for dt in tracker.get_latest_entity_values("place"):
-            place_list.append(dt)
+            place_list.add(dt)
 
         dispatcher.utter_message(
-            text=ass_datetime.get_place_time_different(place_list))
+            text=ass_dt.get_place_time_different(list(place_list)))
 
         return []
 
@@ -131,12 +131,18 @@ class ActionTellWeather(Action):
         entity_local = next(tracker.get_latest_entity_values("place"), None)
         # TODO 提取日期
         if not entity_local:
-            dispatcher.utter_message(text="请重新输入您要查询的城市")
-        weather_res = weather.get_weather_by_day(entity_local)
+            dispatcher.utter_message(text="暂不支持当前城市查询，请输入其它城市")
+            return []
+
+        weather_res = seniverse.get_weather_by_day(entity_local)
+
         if not weather_res:
             dispatcher.utter_message(text="暂不支持县级以下级别的天气查询！")
+            return []
+
         dispatcher.utter_message(text=f"{weather_res['city_name']}的天气: ")
         for wea in weather_res['daily']:
             wea_str = f"{wea['date']}: 白天{wea['text_day']} 夜晚{wea['text_night']} 最高气温{wea['high']}° 最低气温{wea['low']}° {wea['wind_direction']}风{wea['wind_scale']}级"
             dispatcher.utter_message(text=wea_str)
+
         return []
