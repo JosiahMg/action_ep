@@ -153,17 +153,16 @@ def get_place_time_different(place_list):
     if len(place_list) != 2:
         msg = f'您只提供了一个地理位置，无法进行时间差异的比较。'
     else:
-        place1 = city_db.get(normalize_city(place_list[0]), None)
-        place2 = city_db.get(normalize_city(place_list[1]), None)
-        if place1 and place2:
+        place0 = city_db.get(normalize_city(place_list[0]), None)
+        place1 = city_db.get(normalize_city(place_list[1]), None)
+        if place0 and place1:
+            t0 = arrow.utcnow().to(place0)
             t1 = arrow.utcnow().to(place1)
-            t2 = arrow.utcnow().to(place2)
-            (max_t, min_t) = (t1, t2) if t1 > t2 else (t2, t1)
-            t1 = dateparser.parse(str(max_t)[:19])
-            t2 = dateparser.parse(str(min_t)[:19])
-            diff_seconds = t1 - t2
+            (max_t, min_t) = (t0, t1) if t0 > t1 else (t1, t0)
+            diff_seconds = dateparser.parse(
+                str(max_t)[:19]) - dateparser.parse(str(min_t)[:19])
             diff_hours = int(diff_seconds.seconds/3600)
-            if t1 <= t2:
+            if t0 <= t1:
                 msg = f"{place_list[0]}比{place_list[1]}晚{min(diff_hours, 24-diff_hours)}小时。"
             else:
                 msg = f"{place_list[1]}比{place_list[0]}晚{min(diff_hours, 24-diff_hours)}小时。"
