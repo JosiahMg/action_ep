@@ -31,7 +31,7 @@ class ActionTellDate(Action):
 
         # 首先判断是否有DIETClassifier识别的实体 用于获取date的实体(大后天 大前天)
         entity_date = next(
-            tracker.get_latest_entity_values("alien_date"), None)
+            tracker.get_latest_entity_values("relative_date"), None)
         if entity_date:
             dispatcher.utter_message(
                 text=ass_dt.get_date_by_entity(entity_date))
@@ -128,13 +128,24 @@ class ActionTellWeather(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        entity_local = next(tracker.get_latest_entity_values("place"), None)
-        # TODO 提取日期
-        if not entity_local:
-            dispatcher.utter_message(text="暂不支持当前城市查询，请输入其它城市")
-            return []
+        entity_local = tracker.get_slot("place")
+        entity_date = next(
+            tracker.get_latest_entity_values("relative_date"), None)
 
-        weather_res = seniverse.get_weather_by_day(entity_local)
+        day_delta = 0
+        if entity_date:
+            day_delta = ass_dt.get_day_delta(entity_date)
+            if day_delta:
+                if day_delta < 0:
+                    dispatcher.utter_message(text="不支持过去时间的天气查询！")
+                    return []
+                if day_delta > 2:
+                    dispatcher.utter_message(text="仅支持查询三天内的天气！")
+                    return []
+
+        print(f'{entity_date} is {day_delta}')
+
+        weather_res = seniverse.get_weather_by_day(entity_local, day_delta)
 
         if not weather_res:
             dispatcher.utter_message(text="暂不支持县级以下级别的天气查询！")

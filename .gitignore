@@ -1,3 +1,5 @@
 private.py
 main.py
 actions/__pycache__
+actions/dt/__pycache__/
+actions/weather/__pycache__/
