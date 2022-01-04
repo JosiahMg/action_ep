@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import time
 import arrow
 import dateparser
+from actions.utils.create_log import logger
 
 
 def get_day_delta(inquire_date):
@@ -114,14 +115,14 @@ def get_time_by_entity(entity_place):
     input: str 地区或国家名
     output: string
     '''
-    print('entity is ', entity_place)
+    logger.debug('entity is ', entity_place)
     zone_area = city_db.get(normalize_city(entity_place), None)
 
     if not zone_area:
         msg = f'非常抱歉，目前不支持{entity_place}地区的时间查询。'
     else:
         utc = arrow.utcnow()
-        print(zone_area)
+        logger.debug(zone_area)
         area_time = utc.to(zone_area).format('YYYY-MM-DD HH:mm:ss dddd')
         msg = f"{entity_place}现在是 {area_time}"
 
@@ -161,6 +162,7 @@ def get_place_time_different(place_list):
     else:
         place0 = city_db.get(normalize_city(place_list[0]), None)
         place1 = city_db.get(normalize_city(place_list[1]), None)
+        logger.debug(f'place is {place0} and {place1}')
         if place0 and place1:
             t0 = arrow.utcnow().to(place0)
             t1 = arrow.utcnow().to(place1)

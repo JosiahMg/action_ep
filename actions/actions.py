@@ -14,6 +14,7 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from actions.dt import ass_dt
 from actions.weather import seniverse
+from actions.utils.create_log import logger
 
 
 class ActionTellDate(Action):
@@ -30,14 +31,19 @@ class ActionTellDate(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
         # 首先判断是否有DIETClassifier识别的实体 用于获取date的实体(大后天 大前天)
+        logger.debug('[action]action_tell_date')
+
         entity_date = next(
             tracker.get_latest_entity_values("relative_date"), None)
+
         if entity_date:
+            logger.debug(f'[entity value:relative_date]{entity_date}')
             dispatcher.utter_message(
                 text=ass_dt.get_date_by_entity(entity_date))
         else:
             value_date = next(tracker.get_latest_entity_values(
                 "time"), None)  # DucklingEntityExtractor
+            logger.debug(f'[entity value:time]{value_date}')
             dispatcher.utter_message(
                 text=ass_dt.get_date_by_value(value_date))
 
@@ -51,11 +57,14 @@ class ActionDateDifferent(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        logger.debug('[action]action_date_different')
         dt_list = []
 
         for dt in tracker.get_latest_entity_values("time"):
             dt_list.append(dt)
 
+        logger.debug(f'[entity value:time]{dt_list}')
         if len(dt_list) == 0:
             dispatcher.utter_message(response='utter_un_come_true')
 
@@ -84,17 +93,17 @@ class ActionTellTime(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        logger.debug('[action]:action_tell_time')
         # 首先判断是否有DIETClassifier识别出Place实体
         entity_local = next(tracker.get_latest_entity_values("place"), None)
-        print('entity_local:', entity_local)
         if entity_local:
+            logger.debug(f'[entity value:place]{entity_local}')
             dispatcher.utter_message(
                 text=ass_dt.get_time_by_entity(entity_local))
         else:
             value_date = next(tracker.get_latest_entity_values(
                 "time"), None)  # DucklingEntityExtractor
-
+            logger.debug(f'[entity value:time]{entity_local}')
             dispatcher.utter_message(
                 text=ass_dt.get_time_by_value(value_date))
 
@@ -108,12 +117,12 @@ class ActionTimeDifferent(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        logger.debug('[action]action_time_different')
         place_list = set()
 
         for dt in tracker.get_latest_entity_values("place"):
             place_list.add(dt)
-
+        logger.debug(f'[entity value:place]{place_list}')
         dispatcher.utter_message(
             text=ass_dt.get_place_time_different(list(place_list)))
 
@@ -127,7 +136,7 @@ class ActionTellWeather(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        logger.debug('[action]action_tell_weather')
         entity_local = tracker.get_slot("place")
         entity_date = next(
             tracker.get_latest_entity_values("relative_date"), None)

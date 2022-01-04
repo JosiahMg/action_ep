@@ -8,12 +8,14 @@ below code are modified from https://github.com/seniverse/seniverse-api-demos
 import os
 import requests
 import json
+from actions.utils.create_log import logger
 
 try:
     from actions.private import KEY  # KEY值需要
-except Exception:
+except Exception as e:
     KEY = ""
-    print('Please register https://www.seniverse.com get KEY')
+    logger.error(e)
+    logger.error('Please register https://www.seniverse.com get KEY')
 
 
 UID = "U785B76FC9"  # 用户ID
@@ -55,7 +57,9 @@ def get_weather_by_day(location, day=0):
             for d in sorted(day):
                 normal_result['daily'].append(result["results"][0]["daily"][d])
     except Exception as e:
-        print("You don't have access to data of this city.")
+        logger.error(e)
+        logger.error("You don't have access to data of this city.")
+    logger.debug(f'weather return: {normal_result}')
     return normal_result
 
 
