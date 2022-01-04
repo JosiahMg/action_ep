@@ -143,6 +143,7 @@ class ActionTellWeather(Action):
 
         day_delta = 0
         if entity_date:
+            logger.info(f'extract relative_date entity: {entity_date}')
             day_delta = ass_dt.get_day_delta(entity_date)
             if day_delta:
                 if day_delta < 0:
@@ -151,11 +152,9 @@ class ActionTellWeather(Action):
                 if day_delta > 2:
                     dispatcher.utter_message(text="仅支持查询三天内的天气！")
                     return []
-
-        print(f'{entity_date} is {day_delta}')
-
+        logger.info(f'extract local entity: {entity_local}')
         weather_res = seniverse.get_weather_by_day(entity_local, day_delta)
-
+        logger.info(f'get weather info: {weather_res}')
         if not weather_res:
             dispatcher.utter_message(text="暂不支持县级以下级别的天气查询！")
             return []
