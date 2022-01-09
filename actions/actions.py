@@ -10,11 +10,12 @@
 from datetime import datetime
 from typing import Any, Text, Dict, List
 
+from actions.api.indexes import Indexes
+from actions.dt import ass_dt
+from actions.utils.create_log import logger
+from actions.weather import seniverse
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from actions.dt import ass_dt
-from actions.weather import seniverse
-from actions.utils.create_log import logger
 
 
 class ActionTellDate(Action):
@@ -163,5 +164,22 @@ class ActionTellWeather(Action):
         for wea in weather_res['daily']:
             wea_str = f"{wea['date']}: 白天{wea['text_day']} 夜晚{wea['text_night']} 最高气温{wea['high']}° 最低气温{wea['low']}° {wea['wind_direction']}风{wea['wind_scale']}级"
             dispatcher.utter_message(text=wea_str)
+
+        return []
+
+
+class QueryGlobalIndex(Action):
+    def name(self) -> Text:
+        return "action_query_global_index"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        for blob in tracker.latest_message["entities"]:
+            if blob["entity"] != "global_indexs":
+                # response = Indexes().query_global_index()
+                response = Indexes().fetch_index()
+                dispatcher.utter_message(text=response)
 
         return []
