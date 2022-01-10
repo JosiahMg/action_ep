@@ -205,3 +205,5 @@ class ActionCalculate(Action):
         except Exception as e:
             logger.error(e)
             dispatcher.utter_message(text="无法计算出结果，请检查输入是否合法")
+
+        return []
