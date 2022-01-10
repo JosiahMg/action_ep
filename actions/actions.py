@@ -14,6 +14,7 @@ from actions.api.indexes import Indexes
 from actions.dt import ass_dt
 from actions.utils.create_log import logger
 from actions.weather import seniverse
+from actions.calculator import calculator
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
@@ -183,3 +184,24 @@ class QueryGlobalIndex(Action):
                 dispatcher.utter_message(text=response)
 
         return []
+
+
+class ActionCalculate(Action):
+    def name(self) -> Text:
+        return "action_calculate"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        logger.debug('[action]action_calculate')
+        equation = tracker.latest_message['text']
+        logger.info(f'origin math expression: {equation}')
+        expressions = calculator.calculate_mathematic_equation(equation)
+        logger.info(f'extract math expression: {expressions[0]}')
+        try:
+            logger.info(f'expression value : {eval(expressions[0])}')
+            dispatcher.utter_message(
+                text=str(eval(expressions[0])))  # 只支持第一条数学表达式
+        except Exception as e:
+            logger.error(e)
+            dispatcher.utter_message(text="无法计算出结果，请检查输入是否合法")
