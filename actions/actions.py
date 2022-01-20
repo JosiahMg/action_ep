@@ -207,3 +207,31 @@ class ActionCalculate(Action):
             dispatcher.utter_message(text="无法计算出结果，请检查输入是否合法")
 
         return []
+
+
+class ConsultStock(Action):
+    def name(self) -> Text:
+        return "action_consult_stock"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        relative_date = next(tracker.get_latest_entity_values("relative_date"), None)
+        company = next(tracker.get_latest_entity_values("company"), None)
+        logger.debug('relative_date')
+        logger.debug(relative_date)
+        logger.debug('company')
+        logger.debug(company)
+        if relative_date:
+            rd = ass_dt.get_date_by_entity(relative_date)
+            logger.debug('rd')
+            logger.debug(rd)
+        else:
+            ti = next(tracker.get_latest_entity_values(
+                "time"), None)
+            logger.debug('ti')
+            logger.debug(ti)
+
+        dispatcher.utter_message(text="Hello World!")
+        return []
