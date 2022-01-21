@@ -186,6 +186,23 @@ class QueryGlobalIndex(Action):
         return []
 
 
+class FetchIndex(Action):
+    def name(self) -> Text:
+        return "action_fetch_index"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        for blob in tracker.latest_message["entities"]:
+            if blob["entity"] != "global_indexs":
+                response = Indexes().fetch_index()
+
+                dispatcher.utter_message(text=response)
+
+        return []
+
+
 class ActionCalculate(Action):
     def name(self) -> Text:
         return "action_calculate"
