@@ -1,22 +1,15 @@
-# This files contains your custom actions which can be used to run
-# custom Python code.
-#
-# See this guide on how to implement these action:
-# https://rasa.com/docs/rasa/custom-actions
-
-
-# This is a simple example for a custom action which utters "Hello World!"
-
 from datetime import datetime
-from typing import Any, Text, Dict, List
+from typing import Any, Dict, List, Text
 
-from actions.api.indexes import Indexes
-from actions.dt import ass_dt
-from actions.utils.create_log import logger
-from actions.weather import seniverse
-from actions.calculator import calculator
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
+
+from actions.calculator import calculator
+from actions.dt import ass_dt
+from actions.finance.tool import Tool
+from actions.finance.world_index import WorldIndex, WorldIndexHistory
+from actions.utils.create_log import logger
+from actions.weather import seniverse
 
 
 class ActionTellDate(Action):
@@ -251,4 +244,57 @@ class ConsultStock(Action):
             logger.debug(ti)
 
         dispatcher.utter_message(text="Hello World!")
+        return []
+
+
+class QueryWorldIndex(Action):
+    """query world index"""
+
+    def name(self) -> Text:
+        return "action_query_index"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        # date
+        market_date_tmp = next(tracker.get_latest_entity_values("market_date"), None)
+        if market_date_tmp:
+            market_date = ass_dt.get_date_by_entity(market_date_tmp)
+        else:
+            # DucklingEntityExtractor
+            duck_date = next(tracker.get_latest_entity_values("time"), None)
+            market_date = ass_dt.get_date_by_value(duck_date)
+        logger.info(f"market_data: {market_date}")
+
+        # market
+        market_name = next(tracker.get_latest_entity_values("market"), None)
+        # 市场处理，如果找不到市场，则直接返回提示（可以查下列市场），不用再查询接口
+        market_id = Tool.convert_market_id(market_name)
+        if market_id is None:
+            text = "可以查看如下全球指数情况\n"
+            text += Tool.get_world_index_name()
+            dispatcher.utter_message(text=text)
+            return []
+        logger.info(f"market_name: {market_name}, market_id: {market_id}")
+
+        # 时间处理
+        is_today = False
+        market_strftime = None
+        try:
+            market_strftime = market_date.strftime("%Y%m%d")
+        except Exception:
+            is_today = True
+        else:
+            if market_strftime == datetime.today().strftime("%Y%m%d"):
+                is_today = True
+        logger.info(f"is_today: {is_today}, market_strftime: {market_strftime}")
+
+        # 如果是当天，则调用index api, 否则调用index history api
+        if is_today:
+            response_text = WorldIndex().fetch_index(market_id)
+        else:
+            response_text = WorldIndexHistory().fetch_index(market_strftime, market_id)
+        logger.info(f"api response_text: {response_text}")
+        
+        dispatcher.utter_message(text=response_text)
         return []
