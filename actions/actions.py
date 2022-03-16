@@ -295,6 +295,6 @@ class QueryWorldIndex(Action):
         else:
             response_text = WorldIndexHistory().fetch_index(market_strftime, market_id)
         logger.info(f"api response_text: {response_text}")
-        
+
         dispatcher.utter_message(text=response_text)
         return []
