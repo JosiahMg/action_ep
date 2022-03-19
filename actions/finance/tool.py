@@ -33,6 +33,7 @@ class Tool:
             return str(df_tmp.id.values[0])
 
     def is_contain_by(self, name, by_name):
+        """ be contained """
         if by_name.__contains__(name):
             return True
         return False

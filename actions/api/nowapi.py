@@ -2,6 +2,7 @@ import json
 from typing import Any
 
 import requests
+
 from actions.constants import DEFAULT_TIMEOUT
 from actions.utils.create_log import logger
 
@@ -16,7 +17,7 @@ class NowApi:
             "format": "json"
         }
 
-    def get_text(self, params: Any) -> Any:
+    def get_data(self, params: Any) -> Any:
         """根据指数id查询指数信息，调用api接口
 
         Args:
