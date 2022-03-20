@@ -205,11 +205,13 @@ class QueryWorldIndex(Action):
         logger.info(f"relative_date: {relative_date}")
 
         # market
+        market_id = None
         market_name = next(tracker.get_latest_entity_values("market"), None)
-        # 市场处理，如果找不到市场，则直接返回提示（可以查下列市场），不用再查询接口
-        market_id = Tool().convert_market_id(market_name)
-        logger.info(f"market_name: {market_name}, market_id: {market_id}")
+        if market_name is not None:
+            market_id = Tool().convert_market_id(market_name)
+            logger.info(f"market_name: {market_name}, market_id: {market_id}")
 
+        # 市场处理，如果找不到市场，则直接返回提示（可以查下列市场），不用再查询接口
         if market_id is None:
             text = "可以查看如下全球指数情况\n"
             text += Tool().get_world_index_name()

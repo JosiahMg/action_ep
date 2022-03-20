@@ -39,11 +39,11 @@ class Tool:
         return False
 
     def get_world_index_name(self):
-        """ get world index id and name content"""
-        with open(self.world_index_path, encoding="utf-8") as f:
-            content = f.readlines()
-
-        return "".join(content)
+        """ get world index name content"""
+        df = pd.read_table(self.world_index_path, sep=" ", header=None)
+        df.columns = ["id", "name"]
+        names = df.name.values
+        return "\n".join(names)
 
 
 if __name__ == "__main__":
@@ -52,4 +52,6 @@ if __name__ == "__main__":
     print(type(id), id)
     name = tool.get_world_index_name()
     print(name)
+
+
 
