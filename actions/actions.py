@@ -6,6 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from actions.calculator import calculator
 from actions.dt import ass_dt
+from actions.finance.stock import Stock, StockHistory
 from actions.finance.tool import Tool
 from actions.finance.world_index import WorldIndex, WorldIndexHistory
 from actions.utils.create_log import logger
@@ -235,6 +236,62 @@ class QueryWorldIndex(Action):
             response_text = WorldIndex().fetch_index(market_id)
         else:
             response_text = WorldIndexHistory().fetch_index(market_strftime, market_id)
+        logger.info(f"response_text: {response_text}")
+
+        dispatcher.utter_message(text=response_text)
+        return []
+
+
+class QueryStock(Action):
+    def name(self) -> Text:
+        return "action_query_stock"
+
+    async def run(self, dispatcher: CollectingDispatcher,
+                  tracker: Tracker,
+                  domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        # date
+        relative_date_tmp = next(tracker.get_latest_entity_values("relative_date"), None)
+        logger.info(f"relative_date_tmp: {relative_date_tmp}")
+
+        if relative_date_tmp:
+            relative_date = ass_dt.get_date_by_entity(relative_date_tmp)
+        else:
+            # DucklingEntityExtractor
+            duck_date = next(tracker.get_latest_entity_values("time"), None)
+            relative_date = ass_dt.get_date_by_value(duck_date)
+        logger.info(f"relative_date: {relative_date}")
+
+        # company
+        company_id = None
+        company_name = next(tracker.get_latest_entity_values("company"), None)
+        if company_name is not None:
+            company_id = Tool().convert_company_id(company_name)
+            logger.info(f"market_name: {company_name}, market_id: {company_id}")
+
+        # 股市公司处理，如果找不到公司，则直接返回提示（可以查下列股市公司），不用再查询接口
+        if company_id is None:
+            text = "可以查看如下沪股、深股、港股、美股情况\n"
+            text += Tool().get_company_name()
+            dispatcher.utter_message(text=text)
+            return []
+
+        # 时间处理
+        is_today = False
+        market_strftime = None
+        try:
+            market_strftime = relative_date.strftime("%Y%m%d")
+        except Exception:
+            is_today = True
+        else:
+            if market_strftime == datetime.today().strftime("%Y%m%d"):
+                is_today = True
+        logger.info(f"is_today: {is_today}")
+
+        # 如果是当天，则调用stock api, 否则调用stock history api
+        if is_today:
+            response_text = Stock().fetch_stock(company_id)
+        else:
+            response_text = StockHistory().fetch_stock(market_strftime, company_id)
         logger.info(f"response_text: {response_text}")
 
         dispatcher.utter_message(text=response_text)
