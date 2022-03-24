@@ -1,5 +1,4 @@
 import pyswan
-import re
 
 
 def calculate_mathematic_equation(equation):

@@ -32,9 +32,9 @@ class WorldIndex:
             ret = text
         else:
             ret = ""
-            lst = text.get("result").get("lists")
-            if lst is not None:
-                for _, v in lst.items():
+            lists = text.get("result").get("lists")
+            if lists is not None:
+                for _, v in lists.items():
                     ret += f"版块：{v.get('typeid')}\n"
                     ret += f"指数名称：{v.get('inxnm')}\n"
                     ret += f"昨日收盘价：{v.get('yesy_price')}\n"
@@ -90,9 +90,9 @@ class WorldIndexHistory:
             if dt is not None:
                 ret += f"指数编号是{dt.get('inxId')}，名称是{dt.get('inxNm')}"
 
-            lst = text.get("result").get("dtList")
-            if lst is not None:
-                for _, v in lst.items():
+            dt_list = text.get("result").get("dtList")
+            if dt_list is not None:
+                for v in dt_list:
                     ret += f"数据日期：{v.get('dateYmd')}\n"
                     ret += f"今日开盘价：{v.get('openPrice')}\n"
                     ret += f"今日收盘价：{v.get('closePrice')}\n"
@@ -101,6 +101,6 @@ class WorldIndexHistory:
                     ret += f"今日最低价：{v.get('lowPrice')}\n"
                     ret += f"涨跌额：{v.get('changePrice')}\n"
                     ret += f"涨跌幅：{v.get('changeMargin')}\n"
-                    ret += f"成交量：{v.get('volume')}(部分股指为0，以实际数据为准)\n"
-                    ret += f"成交额：{v.get('turnover')}(部分股指为0，以实际数据为准)\n"
+                    ret += f"成交量：{v.get('volume')}\n"
+                    ret += f"成交额：{v.get('turnover')}\n"
         return ret

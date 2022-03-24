@@ -2,9 +2,10 @@ import json
 from typing import Any
 
 import requests
-
 from actions.constants import DEFAULT_TIMEOUT
-from actions.utils.create_log import logger
+from actions.log_utils import get_fmpc_logger
+
+logger = get_fmpc_logger(__name__)
 
 
 class NowApi:

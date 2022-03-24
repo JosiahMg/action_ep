@@ -1,9 +1,11 @@
-from datetime import date, datetime, timedelta
-import time
+from datetime import date, datetime
+
 import arrow
 import dateparser
-from actions.utils.create_log import logger
 
+from actions.log_utils import get_fmpc_logger
+
+logger = get_fmpc_logger(__name__)
 
 def get_day_delta(inquire_date):
 

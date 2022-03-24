@@ -1,7 +1,6 @@
-main.py
-actions/__pycache__
-actions/dt/__pycache__
-actions/weather/__pycache__
-actions/api/__pycache__
-actions/utils/__pycache__
+actions/__pycache__/
+actions/dt/__pycache__/
+actions/weather/__pycache__/
+actions/api/__pycache__/
+actions/logs/
 actions/calculator/__pycache__/

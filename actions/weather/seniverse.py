@@ -5,10 +5,13 @@ below code are modified from https://github.com/seniverse/seniverse-api-demos
 # 心知天气接口  https://www.seniverse.com/
 知心天气接口  只提供未来三天免费的天气查询
 """
-import os
-import requests
 import json
-from actions.utils.create_log import logger
+
+import requests
+
+from actions.log_utils import get_fmpc_logger
+
+logger = get_fmpc_logger(__name__)
 
 try:
     from actions.private import KEY  # KEY值需要
