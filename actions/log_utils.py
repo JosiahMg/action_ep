@@ -1,33 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2019/8/8 22:10
-# @Author  :
-# @Site    :
-# @File    : Logger.py
-# @Software: PyCharm
-
-"""
-日志类。通过读取配置文件，定义日志级别、日志文件名、日志格式等。
-一般直接把logger import进去
-from utils.log import logger
-logger.info('test log')
-"""
-import os
 import logging
+import os
 import sys
 
 from concurrent_log import ConcurrentTimedRotatingFileHandler
 
-from fmpc.utils.ConfigUtils import BASEDIR_LOGS, get_config
-
-path = get_config("log", "path")
-if path is None:
-    path = BASEDIR_LOGS
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-_log_level = get_config("log", "log_level")
-_log_level = _log_level if _log_level is not None and _log_level != "" else "INFO"
+_log_level = "INFO"
+path = os.path.join(os.path.dirname(__file__), "logs")
+if not os.path.exists(path):
+    os.makedirs(path)
 
 
 class Logger:
