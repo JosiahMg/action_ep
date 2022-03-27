@@ -9,8 +9,10 @@ from actions.dt import ass_dt
 from actions.finance.stock import Stock, StockHistory
 from actions.finance.tool import Tool
 from actions.finance.world_index import WorldIndex, WorldIndexHistory
-from actions.utils.create_log import logger
+from actions.log_utils import get_fmpc_logger
 from actions.weather import seniverse
+
+logger = get_fmpc_logger(__name__)
 
 
 class ActionTellDate(Action):
